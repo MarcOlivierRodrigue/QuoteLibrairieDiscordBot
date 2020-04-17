@@ -1,13 +1,20 @@
 import discord
 from discord.ext import commands
+from discord.utils import find
 import asyncio
 import sqlite3
 
 
-bot = commands.Bot(command_prefix='!', case_insensitive=True)
+client = commands.Bot(command_prefix='!', case_insensitive=True)
 
+@client.event
 async def on_ready():
-    return await bot.change_presence(activity=discord.Activity(type=1, name='Chameless Plug', url='https://github.com/MarcOlivierRodrigue/QuoteLibrairieDiscordBot'))
+    print("I'm ready")
+
+@client.event
+async def on_guild_join(guild):
+    general = find(lambda x: x.name == 'general',  guild.text_channels)
+    await general.send('Chameless plug: https://github.com/MarcOlivierRodrigue/QuoteLibrairieDiscordBot')
 
 
-#bot.run(TOKEN)
+#client.run('TOKEN')
