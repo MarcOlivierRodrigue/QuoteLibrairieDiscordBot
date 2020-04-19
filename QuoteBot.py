@@ -22,6 +22,6 @@ async def on_guild_join(server):
             embed.set_footer(text="You can do whatever you want with the source code", icon_url="https://cdn.discordapp.com/embed/avatars/0.png")
             embed.timestamp = datetime.datetime.utcnow()
 
-            await channel.send(content="Hi, I'm **Quotebot**! Here to store any ~~goofs or~~ important informations going on here at your leasure. 😎\n\n -  **Get a reminder:** `!quote ?`\n\n -  **Add a new quote:** `!quote title-quote-author` \n\n -  **Display a quote:** `!quote title`\n\n -  **Display a random quote:** `!quote rand`\n\n  -  **Delete a quote:** `!quote delete-title`\n\n **Note:** `title`, `content` and `author` are defined by you when adding a new quote.", embed=embed)
+            await channel.send(content="Hi, I'm **Quotebot**! Here to store any ~~goofs or~~ important informations going on here at your leasure. 😎\n\n -  **Get a reminder:** `!help`\n\n -  **Add a new quote:** `!add title quote author` \n\n -  **Display a quote:** `!show title`\n\n -  **Display a random quote:** `!random`\n\n  -  **Delete a quote:** `!delete title`\n\n **Note:** `title`, `content` and `author` are defined by you when adding a new quote.", embed=embed)
 
 #client.run('TOKEN')
