@@ -26,6 +26,9 @@ def getHelpText():
 #==============================================
 @client.event
 async def on_ready():
+    db = sqlite3.connect('quotes.sqlite')
+    cursor = db.cursor()
+    cursor.execute("CREATE TABLE IF NOT EXISTS quotes(title TEXT, content TEXT, author TEXT)")
     print("Quotebot ready!")
 
 
