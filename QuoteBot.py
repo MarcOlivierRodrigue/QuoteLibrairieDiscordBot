@@ -16,7 +16,7 @@ client.remove_command('help')
 #==============================================
 def getHelpText():
     helpMessage = "Hi, I'm **Quotebot**! Here to store any ~~goofs or~~ important informations going on here at your leasure. 😎\n\n -  **Get a reminder:** `!help`\n\n -  **Add a new quote:** `!add \"title\" \"content\" \"author\"` \n\n -  **Display a quote:** `!show \"title\"`\n\n -  **Display a random quote:** `!rando`\n\n  -  **Delete a quote:** `!delete \"title\"`\n\n **Note:** `title`, `content` and `author` are defined by you when adding a new quote."
-    embed = discord.Embed(title="Github", colour=0xecb656, url="https://github.com/MarcOlivierRodrigue/QuoteLibrairieDiscordBot", description="The goal of this discord bot is to allow user of guild to manualy register quotes as value and the user as Key. So that they can display later as reminders or funny goofs. You can add it to your guild with this [link](https://discordapp.com)")
+    embed = discord.Embed(title="Github", colour=0xecb656, url="https://github.com/MarcOlivierRodrigue/QuoteLibrairieDiscordBot", description="The goal of this discord bot is to allow user of guild to manualy register quotes as value and the user as Key. So that they can display later as reminders or funny goofs.)")
     embed.set_thumbnail(url="https://cdn.discordapp.com/embed/avatars/0.png")
     embed.set_author(name="By Marc-Olivier Rodrigue", url="https://github.com/MarcOlivierRodrigue/QuoteLibrairieDiscordBot", icon_url="https://cdn.discordapp.com/embed/avatars/0.png")
     embed.set_footer(text="You can do whatever you want with the source code", icon_url="https://cdn.discordapp.com/embed/avatars/0.png")
@@ -70,7 +70,7 @@ async def on_guild_join(guild):
 @client.event
 async def on_command_error(ctx, error):
     if isinstance(error, commands.InvalidEndOfQuotedStringError):
-        await ctx.send("**Error**: Might be one of these issues \n**1.** Make sure each parameter is closed properly with a \". \n**2.** Add a \ before each quotation mark **inside** a single parameter.")
+        await ctx.send("**ERROR**: Might be one of these issues \n**1.** Make sure each parameter is closed properly with a \". \n**2.** Add a \ before each quotation mark **inside** a single parameter.")
 
 
 #==============================================
@@ -103,7 +103,7 @@ async def add(ctx, title: str, content: str, author: str):
 @add.error
 async def add_missingArg(ctx, error):
     if isinstance(error, commands.MissingRequiredArgument):
-            await ctx.send("**Error**: The `title`, `content` and `author` parameters are all mendatory.")
+            await ctx.send("**ERROR**: The `title`, `content` and `author` parameters are all mendatory.")
 
 #==============================================         
 #!help command
@@ -126,12 +126,12 @@ async def rando(ctx):
         c.execute("SELECT title, content, author, addedBy FROM quotes WHERE guild_id = ?", (guild_id,))
         result = c.fetchall()
         if not result:
-            await ctx.send("**Oups** it seems like the cookie jar is empty")
+            await ctx.send("**OOPS** it seems like the cookie jar is empty")
         else:
             quoteCount = 0
             for row in result:
                 quoteCount += 1
-            randRow = result[random.randrange(quoteCount - 1)]
+            randRow = result[random.randint(0, quoteCount - 1)]
             message = getDisplayQuoteMessage() + " - title: {}"
             await ctx.send(message.format(randRow[1], randRow[2], randRow[3], randRow[0]))
         db[1].commit()
@@ -153,7 +153,7 @@ async def show(ctx, title: str):
         c.execute("SELECT content, author, addedBy FROM quotes WHERE guild_id = ? AND title = ?", (guild_id, title))
         result = c.fetchone()
         if result is None:
-            await ctx.send("**Oups** it seems there's a typo or this quote doesn't exist")
+            await ctx.send("**OOPS** it seems there's a typo or this quote doesn't exist")
         else:
             await ctx.send(getDisplayQuoteMessage().format(result[0], result[1], result[2]))
         db[1].commit()
@@ -175,7 +175,7 @@ async def delete(ctx, title: str):
         c.execute("SELECT content, author, addedBy FROM quotes WHERE guild_id = ? AND title = ?", (guild_id, title,))
         result = c.fetchone()
         if result is None:
-            await ctx.send("**Oups** it seems there's a typo or this quote doesn't exist")
+            await ctx.send("**OOPS** it seems there's a typo or this quote doesn't exist")
         else:
             c.execute("DELETE FROM quotes WHERE title = ? AND guild_id = ?", (title, guild_id))
             message = "**Deleted quote**\n*\"{}\"* \n- {} \n added by {}"
