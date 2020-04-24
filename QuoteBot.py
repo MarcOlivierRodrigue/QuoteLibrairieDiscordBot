@@ -3,6 +3,7 @@ from discord.ext import commands
 from discord.utils import find
 import asyncio
 import sqlite3
+from sqlite3 import Error
 import datetime
 
 
@@ -24,12 +25,24 @@ def getHelpText():
 #==============================================
 #When the bot is up and running
 #==============================================
+def connectSqlite():
+    result = True
+    try:
+        db = sqlite3.connect('quotes.sqlite')
+    except Error as e:
+        print(e)
+        result = False
+    return [result, db]
+
 @client.event
 async def on_ready():
-    db = sqlite3.connect('quotes.sqlite')
-    cursor = db.cursor()
-    cursor.execute("CREATE TABLE IF NOT EXISTS quotes(title TEXT, content TEXT, author TEXT)")
-    print("Quotebot ready!")
+    db = connectSqlite()
+    if db[0]:
+        c = db[1].cursor()
+        c.execute("CREATE TABLE IF NOT EXISTS quotes(title TEXT, content TEXT, author TEXT, guild_id TEXT, date TEXT, addedBy TEXT)")
+        print("Quotebot ready!")
+    else: 
+        print("ERROR: Unable to connect to the Sqlite database")
 
 
 
@@ -58,11 +71,29 @@ async def on_command_error(ctx, error):
 #==============================================
 @client.command()
 async def add(ctx, title: str, content: str, author: str):
-    message = "**New quote** {} \n *\"{}\"* \n- {} \n added by {}"
+    message = "**New quote** {} \n*\"{}\"* \n- {} \n added by {}"
+    guild_id = ctx.guild.id
+    date = (datetime.datetime.utcnow()).strftime('%Y-%m-%d %H:%M')
+    addedBy = ctx.author.name
 
-    #TODO: Add the quote in the sqlite table
+    db = connectSqlite()
+    if db[0]:
+        c = db[1].cursor()
+        c.execute("SELECT * FROM quotes WHERE guild_id = ? AND title = ?", (guild_id, title))
+        result = c.fetchone()
+        if result is None:
+            c.execute("INSERT INTO quotes VALUES (?, ?, ?, ?, ?, ?)", (title, content, author, guild_id, date, addedBy))
+            await ctx.send(message.format(title, content, author, addedBy)) 
+        elif result is not None:
+            message = "**Updated quote**\n from:\n{} \n*\"{}\"* - {}\nAdded by {}, {}\n\nto:\n{} \n*\"{}\"*  - {}\nUpdated by {}, {}"
+            c.execute("UPDATE quotes SET title = ?, content = ?, author = ?, guild_id = ?, date = ?, addedBy = ?  WHERE guild_id = ? AND title = ?", (title, content, author, guild_id, date, addedBy, guild_id, title))
+            await ctx.send(message.format(result[0], result[1], result[2], result[5], result[4], title, content, author, addedBy, date))
+        db[1].commit()
+        c.close()
+        db[1].close()
+    else:
+        await ctx.send("**ERROR**: Unable to connect to the Sqlite database")
 
-    await ctx.send(message.format(title, content, author, ctx.author.name)) 
 
 @add.error
 async def add_missingArg(ctx, error):
